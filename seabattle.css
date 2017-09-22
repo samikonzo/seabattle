@@ -39,3 +39,11 @@ td{
 .boat-show{
 	background: rgb(7, 61, 73);
 }
+
+.dead-boat{
+	background:  red;
+}
+
+.no-boat{
+	background: white;
+}

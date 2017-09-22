@@ -8,52 +8,93 @@ var l = console.log,
 
 
 placeBoats(compField);
-placeBoats(playerField);
+placeBoats(playerField, 1);
 
 
-function placeBoats(field){
-	
-	//copy of boats arr
-	var thisBoats = boots.slice().reverse(),
+function placeBoats(field, show){
+	// arrange boats at playground 
 
-		//max length of boat
-		currentLength = thisBoats.length,
-		
-		//maxRow
-		maxRow = field.rows.length, 
+		//copy of boats arr
+		var thisBoats = boots.slice().reverse(),
 
-		//maxCell
-		maxCell = field.rows[0].cells.length,
+			//max length of boat
+			currentLength = thisBoats.length,
+			
+			//maxRow
+			maxRow = field.rows.length, 
 
-		//boat positions
-		boatsPosition = {};
+			//maxCell
+			maxCell = field.rows[0].cells.length,
 
-	//available td
-	var	available = {};
-	[].forEach.call(field.querySelectorAll('td'), td => {
-		var num = +('' + (td.parentElement.sectionRowIndex + 1) + (td.cellIndex + 1))
-		available[ num ] = true;
-	});
-	//l(available)
+			//boat positions
+			boatsPosition = {},
+
+			//live boats
+			boatsLive = [];
 
 
-	for(var i = 0; i < thisBoats.length; i++){
-		var count = thisBoats[i];
+		//available td
+		var	available = {};
+		[].forEach.call(field.querySelectorAll('td'), td => {
+			var num = +('' + (td.parentElement.sectionRowIndex + 1) + (td.cellIndex + 1))
+			available[ num ] = true;
+		});
+		//l(available)
 
-		for(var j = 0; j < count; j++){
-			placeBoat(currentLength);
+
+		for(var i = 0; i < thisBoats.length; i++){
+			var count = thisBoats[i];
+
+			for(var j = 0; j < count; j++){
+				placeBoat(currentLength);
+			}
+
+			currentLength--
 		}
 
-		currentLength--
-	}
+		//if not correct positions
+		if(boatsPosition[NaN]){
+			placeBoats.apply(null, [].slice.call(arguments))
+			return
+		}
 
-	//if not correct positions
-	if(boatsPosition[NaN]){
-		placeBoats(field)
-		return
-	}
+	////////////////////////////////	
 
-	showAll()
+
+	//add eventlisteners
+	
+		if(!show){ // no click on player field
+
+			field.addEventListener('click', (e) => {
+				var td = e.target;
+
+				if(td.nodeName != 'TD') return
+				if(td.classList.contains('open')) return	
+
+
+				td.classList.add('open');
+
+				if(checkTd(td)){
+					td.classList.add('dead-boat');
+				} else {
+					td.classList.add('no-boat');
+				}
+
+				l(boatsLive.length);
+			})
+
+		}
+
+	////////////////////////////////	
+
+
+
+
+	//if show flag => show boats
+	if(show) showAll()
+
+
+
 
 	function placeBoat(length){
 		var groups = [];
@@ -76,6 +117,11 @@ function placeBoats(field){
 			var row = +num.toString()[0],
 				cell = +num.toString()[1];
 
+			//add to live boat
+			boatsLive.push(num);
+
+
+			//make everething around not available
 			for(var i = -1 ; i < 2; i++){
 
 				if(row + i < 1) continue
@@ -160,7 +206,12 @@ function placeBoats(field){
 	function checkTd(td){
 		var num = '' + (td.parentElement.sectionRowIndex + 1) + (td.cellIndex + 1);
 		num = +num;
-		if(boatsPosition[num]) return true
+		
+		if(boatsPosition[num]){
+			boatsLive.splice(boatsLive.indexOf(num), 1);
+			return true
+		}
+
 		return false
 	}
 
@@ -171,6 +222,7 @@ function placeBoats(field){
 
 			field.rows[row].cells[cell].classList.add('boat-show')	
 		}
+
 	}
 }
 
